@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import { AppRouter } from '../../AppRouter'
 import { Methods } from './Methods'
 import { MetadataKeys } from './MetadataKeys'
+
 export function controller(routePrefix: string) {
   return function (target: Function) {
     const router = AppRouter.getInstance()
@@ -13,9 +14,12 @@ export function controller(routePrefix: string) {
         target.prototype,
         key,
       )
+      const middlewares =
+        Reflect.getMetadata(MetadataKeys.middleware, target.prototype, key) ||
+        []
 
       if (path) {
-        router[method](`${routePrefix}${path}`, routeHandler)
+        router[method](`${routePrefix}${path}`, ...middlewares, routeHandler)
       }
     }
   }
